@@ -39,6 +39,11 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.per-file-ignores]
+# Prompts are copied character-for-character from the Node service. Rewrapping
+# them to satisfy a line-length rule would change model output and break parity.
+"app/pipeline/prompts.py" = ["E501"]
+
 [tool.ruff.lint.flake8-bugbear]
 # `Depends(...)` in a signature default is FastAPI's dependency-injection
 # idiom, not the mutable-default bug B008 is designed to catch.
