@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from app.api import health
-from app.api.v1 import upload
+from app.api.v1 import response_status, upload, video_extraction
 from app.deps.auth import require_service_key
 
 
@@ -23,11 +23,10 @@ def create_app() -> FastAPI:
     app.include_router(health.router, tags=["health"])
 
     # Everything under /api/v1 is gated by the service key. /api/health is not.
-    app.include_router(upload.router, tags=["v1"], dependencies=[Depends(require_service_key)])
-
-    # Phase 4 routers mount here:
-    #   app.include_router(video_extraction.router, dependencies=[Depends(require_service_key)])
-    #   app.include_router(response_status.router, dependencies=[Depends(require_service_key)])
+    gated = [Depends(require_service_key)]
+    app.include_router(upload.router, tags=["v1"], dependencies=gated)
+    app.include_router(video_extraction.router, tags=["v1"], dependencies=gated)
+    app.include_router(response_status.router, tags=["v1"], dependencies=gated)
 
     @app.exception_handler(404)
     async def not_found(_request, _exc) -> JSONResponse:

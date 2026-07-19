@@ -11,18 +11,21 @@ Design: [`docs/specs/2026-07-19-python-video-service-design.md`](docs/specs/2026
 
 ## Status
 
-Phase 2 — the full extraction pipeline is ported. All 16 Node modules have a
-Python counterpart, built test-first. 324 tests pass. What remains is
-orchestration: nothing yet runs the pipeline end to end.
+Phase 4 — the service is functionally complete. 427 tests pass, and the whole
+flow has been exercised end to end against real Postgres, real Redis and a real
+Celery worker: invoke → 202 → poll → DONE with the full result inline.
+
+**Not yet proven: output quality.** Every test fakes the OpenAI calls, so the
+structure is guarded but nothing has run against a real video. That is Phase 5.
 
 | Phase | Work | State |
 |---|---|---|
 | 0 | Scaffold, config, health, auth, frozen schemas, CI | done |
 | 1 | Models + Alembic, storage facade, `/upload` | done |
 | 2 | Pipeline modules (16 files) ported test-first | done |
-| 3 | Step decorator + Celery task graph | next |
-| 4 | `/videoExtraction`, `/response-status`, response builder | |
-| 5 | Parity run against the Node service | |
+| 3 | Step ledger + Celery task graph | done |
+| 4 | `/videoExtraction`, `/response-status`, response builder | done |
+| 5 | Parity run against the Node service | next |
 | 6 | AKS manifests, ingress, deploy pipeline | |
 
 ## Guardrails
