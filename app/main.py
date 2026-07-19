@@ -5,10 +5,12 @@ enqueues work and reads results. All ffmpeg/OpenAI work lives in the Celery
 worker (app/worker), so this pod stays small and restarts cheaply.
 """
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 
 from app.api import health
+from app.api.v1 import upload
+from app.deps.auth import require_service_key
 
 
 def create_app() -> FastAPI:
@@ -20,8 +22,10 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, tags=["health"])
 
-    # Phase 1+ routers mount here:
-    #   app.include_router(upload.router, dependencies=[Depends(require_service_key)])
+    # Everything under /api/v1 is gated by the service key. /api/health is not.
+    app.include_router(upload.router, tags=["v1"], dependencies=[Depends(require_service_key)])
+
+    # Phase 4 routers mount here:
     #   app.include_router(video_extraction.router, dependencies=[Depends(require_service_key)])
     #   app.include_router(response_status.router, dependencies=[Depends(require_service_key)])
 

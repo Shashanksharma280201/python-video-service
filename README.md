@@ -11,18 +11,32 @@ Design: [`docs/specs/2026-07-19-python-video-service-design.md`](docs/specs/2026
 
 ## Status
 
-Phase 0 — scaffold. The API contract is frozen in `app/schemas/extraction.py`
-and locked by `tests/test_contract.py`. The pipeline is not ported yet.
+Phase 1 — foundation complete. The API contract is frozen in
+`app/schemas/extraction.py` and locked by `tests/test_contract.py`. 77 tests
+pass. The extraction pipeline itself is not ported yet.
 
 | Phase | Work | State |
 |---|---|---|
 | 0 | Scaffold, config, health, auth, frozen schemas, CI | done |
-| 1 | Models + Alembic, storage facade, `/upload` | next |
-| 2 | Pipeline modules (16 files) ported test-first | |
+| 1 | Models + Alembic, storage facade, `/upload` | done |
+| 2 | Pipeline modules (16 files) ported test-first | next |
 | 3 | Step decorator + Celery task graph | |
 | 4 | `/videoExtraction`, `/response-status`, response builder | |
 | 5 | Parity run against the Node service | |
 | 6 | AKS manifests, ingress, deploy pipeline | |
+
+## Database
+
+```bash
+uv run alembic upgrade head      # apply migrations
+uv run alembic check             # models vs migrations drift check
+```
+
+`DATABASE_URL` drives both the app and Alembic; it is never written to
+`alembic.ini`, so credentials stay out of the repo.
+
+Two tables. `video` mirrors the Node service's Prisma schema column-for-column.
+`workflow_step` is new — it is the resume ledger described above.
 
 ## Architecture
 

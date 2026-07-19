@@ -39,6 +39,11 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.flake8-bugbear]
+# `Depends(...)` in a signature default is FastAPI's dependency-injection
+# idiom, not the mutable-default bug B008 is designed to catch.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Query"]
+
 [tool.mypy]
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
