@@ -11,12 +11,16 @@ Design: [`docs/specs/2026-07-19-python-video-service-design.md`](docs/specs/2026
 
 ## Status
 
-Phase 4 — the service is functionally complete. 427 tests pass, and the whole
-flow has been exercised end to end against real Postgres, real Redis and a real
-Celery worker: invoke → 202 → poll → DONE with the full result inline.
+Phase 5 — a real 15-minute video has been through the full pipeline with real
+OpenAI calls, and its output matches the Node service structurally: identical
+key sets, 40 chapters, 220 transcript segments, identical timeline coverage.
+See [`docs/parity-run-2026-07-20.md`](docs/parity-run-2026-07-20.md).
 
-**Not yet proven: output quality.** Every test fakes the OpenAI calls, so the
-structure is guarded but nothing has run against a real video. That is Phase 5.
+Cost for that run: **$0.21** and 177s wall clock for 15 minutes of video.
+
+One gap remains: the parity run used S3, because the signed-in Azure account
+cannot read the storage account key. The Azure backend is unit-tested but has
+not been exercised end to end — that is the first thing to check in Phase 6.
 
 | Phase | Work | State |
 |---|---|---|
@@ -25,8 +29,8 @@ structure is guarded but nothing has run against a real video. That is Phase 5.
 | 2 | Pipeline modules (16 files) ported test-first | done |
 | 3 | Step ledger + Celery task graph | done |
 | 4 | `/videoExtraction`, `/response-status`, response builder | done |
-| 5 | Parity run against the Node service | next |
-| 6 | AKS manifests, ingress, deploy pipeline | |
+| 5 | Parity run against the Node service | done |
+| 6 | AKS manifests, ingress, deploy pipeline | next |
 
 ## Guardrails
 

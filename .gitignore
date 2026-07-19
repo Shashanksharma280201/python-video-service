@@ -16,3 +16,6 @@ htmlcov/
 *.mp3
 *.jpg
 tmp/
+
+# Phase 5 parity run config (contains no secrets, but environment-specific)
+.env.parity
