@@ -34,6 +34,8 @@ TEMPLATED = {
     "TAG_PHASE_HINT_WITH_PHASES": ("{phases}", "Intro, Repair, Testing"),
     "TAG_SEGMENTS_SYSTEM": ("{phase_hint}", "THE-PHASE-HINT"),
     "REASSIGN_SYSTEM": ("{phases}", "Intro, Repair, Testing"),
+    "VISION_MULTI_FRAME": ("{count}", "5"),
+    "VISION_LOCATE_COMPONENT": ("{step_text}", "Loosen the cap nut"),
 }
 
 
@@ -74,7 +76,44 @@ def test_every_node_prompt_is_covered():
         "TAG_SEGMENTS_SYSTEM",
         "CHUNK_SUMMARY_SYSTEM",
         "REASSIGN_SYSTEM",
+        "DOMAIN_SYSTEM",
+        "VISION_SINGLE_FRAME",
+        "VISION_MULTI_FRAME",
+        "VISION_LOCATE_COMPONENT",
     }
+
+
+def test_the_domain_prompt_keeps_its_grounding_rules():
+    """These three sentences are what stop the guide inventing machine facts.
+
+    Without them the model confidently produces plausible torque values and
+    part numbers that appear nowhere in the video — the worst possible failure
+    for a maintenance guide someone will act on.
+    """
+    p = prompts.DOMAIN_SYSTEM
+    assert "must come ONLY from the transcript" in p
+    assert "Never invent codes, specs, numbers, or steps." in p
+    assert "Leave a section as an empty array" in p
+
+
+def test_the_domain_prompt_requests_every_contract_section():
+    """The 12 guide fields the client reads must all be asked for."""
+    p = prompts.DOMAIN_SYSTEM
+    for field in (
+        "machine",
+        "summary",
+        "overview",
+        "machineIntro",
+        "preventiveMaintenance",
+        "errorCodes",
+        "troubleshooting",
+        "safety",
+        "tools",
+        "parts",
+        "specs",
+        "glossary",
+    ):
+        assert f'"{field}"' in p, f"the domain prompt never asks for {field}"
 
 
 def test_json_examples_survive_formatting():

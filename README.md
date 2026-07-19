@@ -11,19 +11,40 @@ Design: [`docs/specs/2026-07-19-python-video-service-design.md`](docs/specs/2026
 
 ## Status
 
-Phase 1 — foundation complete. The API contract is frozen in
-`app/schemas/extraction.py` and locked by `tests/test_contract.py`. 77 tests
-pass. The extraction pipeline itself is not ported yet.
+Phase 2 — the full extraction pipeline is ported. All 16 Node modules have a
+Python counterpart, built test-first. 324 tests pass. What remains is
+orchestration: nothing yet runs the pipeline end to end.
 
 | Phase | Work | State |
 |---|---|---|
 | 0 | Scaffold, config, health, auth, frozen schemas, CI | done |
 | 1 | Models + Alembic, storage facade, `/upload` | done |
-| 2 | Pipeline modules (16 files) ported test-first | next |
-| 3 | Step decorator + Celery task graph | |
+| 2 | Pipeline modules (16 files) ported test-first | done |
+| 3 | Step decorator + Celery task graph | next |
 | 4 | `/videoExtraction`, `/response-status`, response builder | |
 | 5 | Parity run against the Node service | |
 | 6 | AKS manifests, ingress, deploy pipeline | |
+
+## Guardrails
+
+Three tests exist specifically to catch silent divergence from the Node
+service. They are the ones to understand before changing anything.
+
+**`tests/test_prompt_parity.py`** — every prompt must reach the model
+character-for-character as Node sends it. The expectations are extracted
+programmatically from the TypeScript into `tests/fixtures/node_prompts.json`,
+not retyped. A reworded prompt changes model output while every other test
+still passes, so this is the only thing standing between the port and a slow,
+unexplained quality drift.
+
+**`tests/test_node_parity.py`** — a real captured Azure response (40 chapters,
+220 transcript segments) must round-trip through the Pydantic models with zero
+key drift.
+
+**`tests/test_media_range_reads.py`** — ffmpeg must read remote video by HTTP
+range, not download it whole. This is what keeps a multi-GB source out of the
+worker. Measured reads are bounded in absolute terms (~2.6MB to probe, ~10MB
+for a slice) regardless of source size.
 
 ## Database
 
