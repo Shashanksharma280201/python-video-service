@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app import storage
 from app.db import get_db
+from app.deps.body import json_body
 from app.models import TranscriptStatus, Video
 
 log = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def build_key(filename: str) -> str:
 
 
 @router.post("/api/v1/upload")
-async def upload(payload: dict, db: Session = Depends(get_db)) -> JSONResponse:
+async def upload(payload: dict = Depends(json_body), db: Session = Depends(get_db)) -> JSONResponse:
     title = (payload.get("title") or "").strip()
     filename = (payload.get("filename") or "").strip()
     description = payload.get("description") or ""

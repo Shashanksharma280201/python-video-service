@@ -25,6 +25,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.deps.body import json_body
 from app.models import TranscriptStatus, Video
 from app.services.extraction_response import build_extraction_response
 from app.storage import StorageUrlError, exists, parse_storage_url
@@ -74,7 +75,9 @@ def _respond(video: Video) -> JSONResponse:
 
 
 @router.post("/api/v1/videoExtraction")
-async def video_extraction(payload: dict, db: Session = Depends(get_db)) -> JSONResponse:
+async def video_extraction(
+    payload: dict = Depends(json_body), db: Session = Depends(get_db)
+) -> JSONResponse:
     machine_id = (payload.get("machineId") or "").strip()
     resource_id = (payload.get("resourceId") or "").strip()
     tenant_id = (payload.get("tenantId") or "").strip()
